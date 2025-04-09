@@ -1,4 +1,26 @@
 
+from bup.compat import dataclass
+
+
+def _make_base(config_get, compression_level, max_pack_size, max_pack_objects):
+
+    @dataclass(slots=True, frozen=True)
+    class Base():
+        """Components shared by all repos."""
+        compression_level: int
+        max_pack_size: int
+        max_pack_objects: int
+
+    if compression_level is None:
+        compression_level = config_get(b'pack.compression', opttype='int')
+    if compression_level is None:
+        compression_level = config_get(b'core.compression', opttype='int')
+    # If it's still None, the lower levels should choose 1
+    return Base(compression_level=compression_level,
+                max_pack_objects=max_pack_objects,
+                max_pack_size=max_pack_size or config_get(b'pack.packSizeLimit',
+                                                          opttype='int'))
+
 def notimplemented(fn):
     def newfn(obj, *args, **kwargs):
         raise NotImplementedError(f'{obj.__class__.__name__}.{fn.__name__}')
@@ -8,12 +30,6 @@ class RepoProtocol:
     # Specification only; intentially has no implementations
     # Subclassing just indicates intent.
     # Currently, the vfs relies on id(repo) for caching paths.
-
-    def _validate_init(self):
-        """Ensures instance is sound; should be called by all subclasses."""
-        hasattr(self, 'compression_level')
-        hasattr(self, 'max_pack_objects')
-        hasattr(self, 'max_pack_size')
 
     @notimplemented
     def is_remote(self):

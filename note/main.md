@@ -63,6 +63,10 @@ General
   The default for new repositories will eventually be raised. See
   `bup-config`(5) for additional information.
 
+* The default pack compression level can now be configured via either
+  `pack.compression` or `core.compression`.  See `bup-config`(5) for
+  additional information.
+
 * `bup web` has been improved.  It should better preserve page
   settings while navigating, and has added settings to toggle the
   display of various types of information, including path sizes,
@@ -85,6 +89,13 @@ Bugs
 * A bug has been fixed that could cause any internal subcommand
   (e.g. not `import-rsnapshot`) to hang when running interactively
   (i.e. with a controlling terminal).
+
+* Saves with identical dates won't end up with the same name
+  (e.g. 2025-01-08-135615 in "bup ls BRANCH") when they're not
+  adjacent -- when one isn't the other's direct parent. Previously bup
+  appended an increasing "-N" to disambiguate duplicates, but only
+  when they were directly related. Now it appends across all
+  duplicates.
 
 Build system
 ------------
